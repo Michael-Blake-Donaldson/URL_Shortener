@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path');
 const config = require('./config');
 const db = require('./db');
 const UrlRepository = require('./repositories/urlRepository');
@@ -26,6 +27,10 @@ const rateLimiter = createRateLimiter({
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' });
+});
+
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 app.post('/shorten', rateLimiter, async (req, res, next) => {

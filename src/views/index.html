@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Shortener</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        color: #1f2937;
+      }
+
+      .container {
+        max-width: 640px;
+        margin: 64px auto;
+        padding: 24px;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+      }
+
+      h1 {
+        margin-top: 0;
+        font-size: 1.5rem;
+      }
+
+      form {
+        display: grid;
+        gap: 12px;
+      }
+
+      label {
+        font-weight: 600;
+      }
+
+      input {
+        width: 100%;
+        box-sizing: border-box;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 0.95rem;
+      }
+
+      .row {
+        display: grid;
+        grid-template-columns: 1fr 120px;
+        gap: 12px;
+      }
+
+      button {
+        padding: 10px 14px;
+        border: 0;
+        border-radius: 6px;
+        background: #2563eb;
+        color: #fff;
+        cursor: pointer;
+        font-weight: 600;
+      }
+
+      button:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+      }
+
+      .result,
+      .error {
+        margin-top: 16px;
+        padding: 12px;
+        border-radius: 6px;
+        word-break: break-word;
+      }
+
+      .result {
+        background: #f0fdf4;
+        border: 1px solid #86efac;
+      }
+
+      .error {
+        background: #fef2f2;
+        border: 1px solid #fca5a5;
+      }
+
+      .actions {
+        margin-top: 12px;
+        display: flex;
+        gap: 8px;
+      }
+
+      .secondary {
+        background: #374151;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="container">
+      <h1>URL Shortener</h1>
+      <p>Paste a long URL and optionally set expiration days.</p>
+
+      <form id="shortenForm">
+        <div>
+          <label for="originalUrl">Long URL</label>
+          <input
+            id="originalUrl"
+            name="originalUrl"
+            type="url"
+            placeholder="https://example.com/some/long/path"
+            required
+          />
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="ttlDays">TTL Days (optional)</label>
+            <input id="ttlDays" name="ttlDays" type="number" min="1" placeholder="7" />
+          </div>
+          <div style="display:flex; align-items:end;">
+            <button id="submitBtn" type="submit">Shorten</button>
+          </div>
+        </div>
+      </form>
+
+      <div id="output"></div>
+    </main>
+
+    <script>
+      const form = document.getElementById('shortenForm');
+      const output = document.getElementById('output');
+      const submitBtn = document.getElementById('submitBtn');
+
+      function renderError(message) {
+        output.innerHTML = `<div class="error">${message}</div>`;
+      }
+
+      function renderResult(data) {
+        const expires = data.expiresAt ? `<p><strong>Expires:</strong> ${new Date(data.expiresAt).toLocaleString()}</p>` : '<p><strong>Expires:</strong> Never</p>';
+
+        output.innerHTML = `
+          <div class="result">
+            <p><strong>Short URL:</strong> <a href="${data.shortUrl}" target="_blank" rel="noopener noreferrer">${data.shortUrl}</a></p>
+            <p><strong>Code:</strong> ${data.shortCode}</p>
+            ${expires}
+            <div class="actions">
+              <button id="copyBtn" class="secondary" type="button">Copy Short URL</button>
+              <button id="openBtn" type="button">Open</button>
+            </div>
+          </div>
+        `;
+
+        document.getElementById('copyBtn').addEventListener('click', async () => {
+          await navigator.clipboard.writeText(data.shortUrl);
+          alert('Copied!');
+        });
+
+        document.getElementById('openBtn').addEventListener('click', () => {
+          window.open(data.shortUrl, '_blank', 'noopener,noreferrer');
+        });
+      }
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        output.innerHTML = '';
+
+        const originalUrl = form.originalUrl.value.trim();
+        const ttlValue = form.ttlDays.value.trim();
+
+        const payload = { originalUrl };
+        if (ttlValue) {
+          payload.ttlDays = Number.parseInt(ttlValue, 10);
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Working...';
+
+        try {
+          const response = await fetch('/shorten', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          const data = await response.json();
+
+          if (!response.ok) {
+            renderError(data.error || 'Failed to shorten URL.');
+            return;
+          }
+
+          renderResult(data);
+        } catch (error) {
+          renderError('Network error. Please try again.');
+        } finally {
+          submitBtn.disabled = false;
+          submitBtn.textContent = 'Shorten';
+        }
+      });
+    </script>
+  </body>
+</html>

@@ -91,6 +91,19 @@ Stop containers:
 docker compose down
 ```
 
+## Web UI
+
+Open the app in your browser:
+
+- `http://localhost:3000/`
+
+Use the form to:
+
+- Paste a long URL
+- Optionally set `ttlDays`
+- Get a shortened URL
+- Copy or open the result directly
+
 ## Performance Work
 
 ### 1) Benchmark without index vs with index
