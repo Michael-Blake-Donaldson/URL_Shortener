@@ -130,6 +130,14 @@
       const output = document.getElementById('output');
       const submitBtn = document.getElementById('submitBtn');
 
+      function getShortenEndpoint() {
+        if (window.location.port === '5500') {
+          return 'http://127.0.0.1:3001/shorten';
+        }
+
+        return '/shorten';
+      }
+
       function renderError(message) {
         output.innerHTML = `<div class="error">${message}</div>`;
       }
@@ -175,7 +183,7 @@
         submitBtn.textContent = 'Working...';
 
         try {
-          const response = await fetch('/shorten', {
+          const response = await fetch(getShortenEndpoint(), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
