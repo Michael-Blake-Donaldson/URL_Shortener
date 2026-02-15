@@ -59,17 +59,24 @@ Table: `urls`
 ## Setup
 
 1. Copy `.env.example` to `.env` and fill your MySQL credentials.
-2. Create schema/table:
+1. Create schema/table:
 
 ```sql
 SOURCE db/schema.sql;
 ```
 
-3. Install dependencies and start:
+1. Install dependencies and start:
 
 ```bash
 npm install
 npm run start
+```
+
+If port `3000` is busy on your machine, set in `.env`:
+
+```dotenv
+PORT=3001
+BASE_URL=http://127.0.0.1:3001
 ```
 
 ## Docker (One Command)
@@ -96,6 +103,12 @@ docker compose down
 Open the app in your browser:
 
 - `http://localhost:3000/`
+
+Live Server mode:
+
+- Open `src/views/index.html` with VS Code Live Server (`http://127.0.0.1:5500`)
+- Keep the API running on `http://127.0.0.1:3001`
+- The UI will call `POST http://127.0.0.1:3001/shorten`
 
 Use the form to:
 
