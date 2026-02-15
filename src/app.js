@@ -1,5 +1,6 @@
 const express = require('express');
 const path = require('path');
+const QRCode = require('qrcode');
 const config = require('./config');
 const db = require('./db');
 const UrlRepository = require('./repositories/urlRepository');
@@ -64,6 +65,42 @@ app.post('/shorten', rateLimiter, async (req, res, next) => {
     });
 
     res.status(201).json(result);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/qr/:shortCode.svg', rateLimiter, async (req, res, next) => {
+  try {
+    const { shortCode } = req.params;
+    const shortUrl = `${config.baseUrl}/${shortCode}`;
+    const svg = await QRCode.toString(shortUrl, {
+      type: 'svg',
+      width: 320,
+      margin: 1
+    });
+
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.setHeader('Content-Disposition', `attachment; filename="${shortCode}.svg"`);
+    res.send(svg);
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get('/qr/:shortCode.png', rateLimiter, async (req, res, next) => {
+  try {
+    const { shortCode } = req.params;
+    const shortUrl = `${config.baseUrl}/${shortCode}`;
+    const png = await QRCode.toBuffer(shortUrl, {
+      type: 'png',
+      width: 320,
+      margin: 1
+    });
+
+    res.setHeader('Content-Type', 'image/png');
+    res.setHeader('Content-Disposition', `attachment; filename="${shortCode}.png"`);
+    res.send(png);
   } catch (error) {
     next(error);
   }

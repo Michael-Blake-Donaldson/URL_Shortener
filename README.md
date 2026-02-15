@@ -6,6 +6,7 @@ A production-style URL shortener backend in Node.js + MySQL focused on hashing, 
 
 - `POST /shorten` to create short links
 - `GET /:shortCode` to redirect to original URL
+- `GET /qr/:shortCode.png` and `GET /qr/:shortCode.svg` to generate downloadable QR codes
 - Collision-resistant short code generation (base62 + crypto randomness)
 - MySQL persistence with unique indexed `short_code`
 - In-memory LRU cache for hot read paths
@@ -42,6 +43,11 @@ Response:
 - `302` redirect for active links
 - `404` if code does not exist
 - `410` if link is expired
+
+### `GET /qr/:shortCode.png` and `GET /qr/:shortCode.svg`
+
+- Returns a QR code image for the short URL
+- PNG and SVG are both downloadable via browser
 
 ## Database Design
 
@@ -116,6 +122,7 @@ Use the form to:
 - Optionally set `ttlDays`
 - Get a shortened URL
 - Copy or open the result directly
+- Preview and download QR code as PNG or SVG
 
 ## Performance Work
 

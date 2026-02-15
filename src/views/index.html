@@ -89,6 +89,34 @@
         gap: 8px;
       }
 
+      .qr-block {
+        margin-top: 14px;
+      }
+
+      .qr-image {
+        width: 160px;
+        height: 160px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        background: #ffffff;
+      }
+
+      .qr-links {
+        margin-top: 8px;
+        display: flex;
+        gap: 12px;
+      }
+
+      .qr-links a {
+        color: #1d4ed8;
+        text-decoration: none;
+        font-weight: 600;
+      }
+
+      .qr-links a:hover {
+        text-decoration: underline;
+      }
+
       .secondary {
         background: #374151;
       }
@@ -130,12 +158,16 @@
       const output = document.getElementById('output');
       const submitBtn = document.getElementById('submitBtn');
 
-      function getShortenEndpoint() {
+      function getApiBase() {
         if (window.location.port === '5500') {
-          return 'http://127.0.0.1:3001/shorten';
+          return 'http://127.0.0.1:3001';
         }
 
-        return '/shorten';
+        return '';
+      }
+
+      function getShortenEndpoint() {
+        return `${getApiBase()}/shorten`;
       }
 
       function renderError(message) {
@@ -144,6 +176,9 @@
 
       function renderResult(data) {
         const expires = data.expiresAt ? `<p><strong>Expires:</strong> ${new Date(data.expiresAt).toLocaleString()}</p>` : '<p><strong>Expires:</strong> Never</p>';
+        const apiBase = getApiBase();
+        const qrPngUrl = `${apiBase}/qr/${encodeURIComponent(data.shortCode)}.png`;
+        const qrSvgUrl = `${apiBase}/qr/${encodeURIComponent(data.shortCode)}.svg`;
 
         output.innerHTML = `
           <div class="result">
@@ -153,6 +188,14 @@
             <div class="actions">
               <button id="copyBtn" class="secondary" type="button">Copy Short URL</button>
               <button id="openBtn" type="button">Open</button>
+            </div>
+            <div class="qr-block">
+              <p><strong>QR Code:</strong></p>
+              <img class="qr-image" src="${qrPngUrl}" alt="QR code for ${data.shortUrl}" />
+              <div class="qr-links">
+                <a href="${qrPngUrl}" download="${data.shortCode}.png">Download PNG</a>
+                <a href="${qrSvgUrl}" download="${data.shortCode}.svg">Download SVG</a>
+              </div>
             </div>
           </div>
         `;
