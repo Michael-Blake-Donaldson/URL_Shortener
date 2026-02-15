@@ -72,6 +72,25 @@ npm install
 npm run start
 ```
 
+## Docker (One Command)
+
+Run app + MySQL together:
+
+```bash
+docker compose up --build
+```
+
+Then test:
+
+- Health: `http://localhost:3000/health`
+- Create short URL: `POST http://localhost:3000/shorten`
+
+Stop containers:
+
+```bash
+docker compose down
+```
+
 ## Performance Work
 
 ### 1) Benchmark without index vs with index
